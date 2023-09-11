@@ -7,8 +7,9 @@ import {Image} from "react-bootstrap";
 import Table from 'react-bootstrap/Table';
 import Container from 'react-bootstrap/Container';
 import "./App.css"
- 
+
 export default function App(){
+ //Add card input will be stored in this use state
   const [CardInputs, setCardInputs] = useState({
     NameOnCard: "",
     CardNumber:"",
@@ -17,6 +18,8 @@ export default function App(){
     CVV:"",
     Country:""
   });
+ //Card input will be stored on this array, the is
+ //information will be stored in a localstorage "session"
   const [card, setCards] = useState(() => {
     const localValue = localStorage.getItem("CARDS")
     if(localValue == null){
@@ -25,17 +28,19 @@ export default function App(){
     return JSON.parse(localValue)
   });
   const [country, getCountry] = useState([]);
+ //Card number data will be stored in this use state
   const [CardNumberArr, getCardNumber] = useState([]);
   //Create a list of banned countries
   const [bannedCountry, getbannedCountry] = useState(["Iran", "Cuba", "North Korea", "Sudan", "Syria", "Ukraine"]);
 
   useEffect(() => {
+   //Set the information on localstorage
     localStorage.setItem("CARDS", JSON.stringify(card))
     localStorage.setItem("BANNEDLIST", JSON.stringify(bannedCountry))
   }, [card, bannedCountry])
 
   useEffect(() => {
-    // Retrieve the stored JSON strings from localStorage AND Parse the JSON strings to get the object and array
+    // Get the information from setItems
     const StoredBannedArr = JSON.parse(localStorage.getItem("BANNEDLIST"));
     // Set the state with the retrieved data
     if (StoredBannedArr) {
@@ -43,13 +48,13 @@ export default function App(){
     }
   }, []);
 
-  //Submit everything on the foem
+  //Submit the information from the form
   function handleSubmit (e) {
     e.preventDefault();
-    console.log("Step1");
     const newNCountry = CardInputs.Country;
+   //Validate the form using validate
     CardValidation();
-      // Use fetc0h to load the file content
+      // Use fetch to load the txt file content into an array
       fetch('/countries.txt')
         .then((Coderesponse) => {
           if (Coderesponse.ok) {
@@ -61,31 +66,31 @@ export default function App(){
         .then((countryToArr) => {
           // Split the content into an array
           const arr = countryToArr.split(/\r?\n/);
-          
+          //Check for the specific country
           const GetSpecificCoun = arr.filter((country) =>
           country.toLowerCase().includes(newNCountry.toLowerCase())
           );
 
-          //Check if the Card Number exists
+          //Check if the Card Number exists before submitting
           const Checkbanned = bannedCountry.filter((country) =>
             country.toLowerCase().includes(CardInputs.Country.toLowerCase())
           );
 
- 
+          
           if(CardNumberArr.includes(CardInputs.CardNumber)){
             alert("Card Number already exists");
             return;
+           //Checks if there's banned countries
           }else if(Checkbanned.length > 0 && CardInputs.Country !== ""){
             alert("You selected a banned country");
             return;
+           //Checks if input country exists
           }else if(GetSpecificCoun.length === 0){
             alert("The country doesn't exist");
             return;
           }
           else{
-            console.log("False");
-            console.log("True");
-            // getCountry(GetSpecificCoun);
+            //Stores the information in a useState
             setCards((latestCard) => {
               return [
                 ...latestCard, {NameOnCard: CardInputs.NameOnCard, CardNumber:CardInputs.CardNumber, ExpiryDay: CardInputs.ExpiryDay ,ExpiryMonth:CardInputs.ExpiryMonth ,CVV: CardInputs.CVV, Country: CardInputs.Country},
@@ -103,10 +108,11 @@ export default function App(){
         });
   }
 
-  //Validation
+  //Validation the Add card form
   const [errors, setErrors] = useState({});
   const validationErrors = {}
   function CardValidation(){
+   //Checks is there's a value in the text box
     if(!CardInputs.NameOnCard.trim()){
       validationErrors.NameOnCard = "Name On Card is required"
     }
@@ -130,19 +136,15 @@ export default function App(){
     if(!CardInputs.Country.trim()){
       validationErrors.Country = "Country is required"
     }
-
     setErrors(validationErrors)
-
-    
-
     if(Object.keys(validationErrors).length === 0){
       alert("Form Submitted successfully")
     }
   }
 
-  //Add banned countries
+  //Configures banned countries
   const [InputBanned, getInputBanned] = useState('');
-  //Validation
+  //Validates the banned country form
   const [errors2, setErrors2] = useState({});
   const validationErrors2 = {}
   function CardValidation2(){
@@ -155,7 +157,7 @@ export default function App(){
       alert("Form Submitted successfully")
     }
   }
-
+ //Adds the a country to a banned countries list
   function AddBannedCountry(){
     fetch('/countries.txt')
     .then((Coderesponse) => {
@@ -199,8 +201,8 @@ export default function App(){
     });
   }
 
+ //Removes a country from a banned countries
   function RemoveBannedCountry(){
-
     fetch('/countries.txt')
     .then((Coderesponse) => {
       if (Coderesponse.ok) {
@@ -240,7 +242,6 @@ export default function App(){
     });
 
   }
-
 
   return(
     <>
@@ -291,14 +292,14 @@ export default function App(){
           </div>
         </Form>
       </Col>
-
+      {/* This is a form image */}
       <Col>
       <div>
            <Image src="./6134225.jpg" thumbnail style={{border:"none"}} /> 
         </div>
       </Col>
       </Row>
-
+    
     <Container style={{marginTop:"10%", marginBottom:"10%"}}>
         {/* Display the information on the table  */}
         <h2>Card list</h2>
@@ -328,6 +329,7 @@ export default function App(){
     
     <Row>
     <Col>
+     {/* Form for adding and removing banned countries */}
     <Container>
         <div className="align-items-center">
         <Form id="ConCountry" style={{width:"80%", marginLeft:"10%", marginTop:"20%"}}>
